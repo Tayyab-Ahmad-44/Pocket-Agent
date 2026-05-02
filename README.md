@@ -14,23 +14,6 @@ python demo.py                      # Gradio demo
 
 ---
 
-## The 500 MB gate
-
-The PS has a hard gate of **≤500 MB for the quantized model**. Qwen3-0.6B
-comfortably fits at standard quant levels:
-
-| Quant   | ~Size (0.6B) | Gate? | Notes                              |
-| ------- | -----------: | :---: | ---------------------------------- |
-| Q4_K_M  | ~420 MB      | ✅    | default — good quality/size trade  |
-| Q5_K_M  | ~490 MB      | ✅    | borderline, skip it                |
-| Q3_K_M  | ~320 MB      | ✅    | fallback                           |
-| Q2_K    | ~240 MB      | ✅    | under 250 MB bonus threshold (+10) |
-
-The notebook walks a fallback chain automatically (`q4_k_m` → `q3_k_m` → `q2_k`)
-and stops at the first quant that passes the 500 MB gate.
-
----
-
 ## Design decisions
 
 **Base model: `unsloth/Qwen3-0.6B`.** Unsloth mirror of the Qwen3 weights —
@@ -79,46 +62,16 @@ stage 1/
 ├── inference.py              ← grader entry point  (def run(prompt, history))
 ├── requirements.txt
 ├── demo.py                   ← Gradio UI
-├── pocket-agent.ipynb        ← training + merge + quantize  (runs on Kaggle/T4)
-├── starter_pack/
-│   ├── public_test.jsonl
-│   ├── teacher_examples.jsonl
+├── dataset/
 │   ├── tool_schemas.json
-│   └── train_qwen_cleaned.jsonl
+│   └── qwen_cleaned.jsonl
+├── training/
+│   ├── pocket-agent.ipynb
 └── artifacts/
     ├── lora_adapter/         ← LoRA weights (~50 MB)
     ├── merged_16bit/         ← merged fp16 model (intermediate, large)
     └── pocket-agent.gguf     ← FINAL quantized model
 ```
-
----
-
-## Troubleshooting
-
-**`'torch_dtype'` KeyError on model load.** You're on an older Unsloth. Upgrade:
-`pip install -U unsloth`. The 2026.4.x line renamed the kwarg to `dtype`.
-
-**Loss stays flat around 2-3 and never drops.** The markers for
-`train_on_responses_only` probably don't match your chat template. Check the
-sanity-check output at the start of training — it should show the assistant
-turn only. If it shows 0 supervised tokens or the entire conversation,
-inspect `tokenizer.apply_chat_template(...)` output and adjust the marker
-strings.
-
-**Inference latency is 400+ ms.** Colab CPU runtime only has 2 cores; check
-`n_threads` in `inference.py`. If you're on a machine with more cores,
-`os.cpu_count()` picks them up automatically. Also verify the GGUF isn't an
-f16/Q8 — those are much slower than Q4_K_M on CPU.
-
-**Chatbot shows JSON in raw text instead of a nice display.** Intentional —
-the PS grader scores on the exact string emitted, so the chatbot shows what
-the grader would see.
-
-**Model still emits `<think>` blocks.** The `/no_think` token wasn't injected
-into the system prompt correctly. Check the data prep cell in the notebook —
-it appends `\n/no_think` to every system message.
-
----
 
 ## Error analysis
 
@@ -135,9 +88,3 @@ After running inference on `public_test.jsonl`, categorize failures:
   Fix: train set needs more refusal examples.
 - **`should_have_called`** — model refused when it should have called. Often
   code-switched user turn. Fix: add code-switched paraphrases to the train set.
-
----
-
-## License
-
-Code: MIT. Model weights: inherit from Qwen3 (Apache 2.0).
