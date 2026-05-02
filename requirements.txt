@@ -1,0 +1,9 @@
+# Core Inference (Hard Gate Compliance)
+llama-cpp-python>=0.2.76
+numpy>=1.24.0
+
+# Demo & UI (Manual Judge Check)
+gradio>=4.0.0
+
+# Compatibility Patches (If running the patch script in the environment)
+pathlib

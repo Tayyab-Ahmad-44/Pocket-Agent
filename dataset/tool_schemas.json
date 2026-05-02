@@ -1,0 +1,104 @@
+{
+  "tools": [
+    {
+      "name": "weather",
+      "description": "Get current weather information for a specific location.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "The city and country/state (e.g., 'Karachi, Pakistan')."
+          },
+          "unit": {
+            "type": "string",
+            "enum": ["C", "F"],
+            "description": "The temperature unit to return."
+          }
+        },
+        "required": ["location", "unit"]
+      }
+    },
+    {
+      "name": "calendar",
+      "description": "List existing events or create new appointments in the calendar.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["list", "create"],
+            "description": "Whether to view events or add a new one."
+          },
+          "date": {
+            "type": "string",
+            "description": "The date in YYYY-MM-DD format."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the event (required for 'create', optional for 'list')."
+          }
+        },
+        "required": ["action", "date"]
+      }
+    },
+    {
+      "name": "convert",
+      "description": "Convert physical measurements between different units (weight, distance, etc.).",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "The numeric value to convert."
+          },
+          "from_unit": {
+            "type": "string",
+            "description": "The starting unit (e.g., 'kilograms')."
+          },
+          "to_unit": {
+            "type": "string",
+            "description": "The target unit (e.g., 'pounds')."
+          }
+        },
+        "required": ["value", "from_unit", "to_unit"]
+      }
+    },
+    {
+      "name": "currency",
+      "description": "Convert monetary amounts from one currency to another.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "The amount of money to convert."
+          },
+          "from": {
+            "type": "string",
+            "description": "The ISO3 source currency code (e.g., 'USD')."
+          },
+          "to": {
+            "type": "string",
+            "description": "The ISO3 target currency code (e.g., 'PKR')."
+          }
+        },
+        "required": ["amount", "from", "to"]
+      }
+    },
+    {
+      "name": "sql",
+      "description": "Execute a structured query against the local SQLite database.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The full SQL statement to be executed."
+          }
+        },
+        "required": ["query"]
+      }
+    }
+  ]
+}
